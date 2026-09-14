@@ -1,20 +1,16 @@
-```json
 {
   "name": "abdalkader-portfolio-react",
   "version": "5.0.0",
   "private": true,
   "description": "Abdalkader Ahmad Al-Hamoud portfolio - React + Vite + Node.js + Express + MySQL",
-
   "scripts": {
     "dev": "concurrently \"node server.cjs\" \"vite\"",
     "build": "vite build",
     "start": "node server.cjs"
   },
-
   "engines": {
     "node": "22.x"
   },
-
   "dependencies": {
     "@vitejs/plugin-react": "^5.0.2",
     "bcryptjs": "^3.0.2",
@@ -27,7 +23,5 @@
     "react-dom": "^19.1.1",
     "vite": "^7.1.3"
   },
-
   "devDependencies": {}
 }
-```
