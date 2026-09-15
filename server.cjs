@@ -9,7 +9,24 @@ const path = require('path');
 const fs = require('fs');
 
 const app = express();
+// Allow requests from the Netlify frontend
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
 
+  if (origin === 'https://abdalkader-portfolio.netlify.app') {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Vary', 'Origin');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,DELETE,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  }
+
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204);
+  }
+
+  next();
+});
 const PORT = Number(process.env.PORT || 8000);
 
 const DB_CONFIG = {
