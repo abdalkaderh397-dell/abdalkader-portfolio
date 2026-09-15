@@ -6,6 +6,7 @@ const bcrypt = require('bcryptjs');
 const mysql = require('mysql2/promise');
 const crypto = require('crypto');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 
@@ -18,7 +19,8 @@ const DB_CONFIG = {
   password: process.env.DB_PASS || ''
 };
 
-const DB_NAME = process.env.DB_NAME || 'abdalkader_portfolio';
+const DB_NAME =
+  process.env.DB_NAME || 'abdalkader_portfolio';
 
 let pool;
 
@@ -52,7 +54,8 @@ async function initDatabase() {
   console.log('Connecting to MySQL...');
 
   // الاتصال بـ MySQL بدون اختيار قاعدة بيانات أولًا
-  const connection = await mysql.createConnection(DB_CONFIG);
+  const connection =
+    await mysql.createConnection(DB_CONFIG);
 
   // إنشاء قاعدة البيانات
   const safeDbName = DB_NAME.replace(/`/g, '');
@@ -65,7 +68,9 @@ async function initDatabase() {
 
   await connection.end();
 
-  console.log(`Database "${DB_NAME}" is ready.`);
+  console.log(
+    `Database "${DB_NAME}" is ready.`
+  );
 
   // إنشاء Pool خاص بقاعدة البيانات
   pool = mysql.createPool({
@@ -85,7 +90,8 @@ async function initDatabase() {
       id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
       username VARCHAR(80) NOT NULL UNIQUE,
       password_hash VARCHAR(255) NOT NULL,
-      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+      created_at TIMESTAMP NOT NULL
+        DEFAULT CURRENT_TIMESTAMP
     ) ENGINE=InnoDB
     DEFAULT CHARSET=utf8mb4
   `);
@@ -101,12 +107,16 @@ async function initDatabase() {
       id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
       name VARCHAR(80) NULL,
       email VARCHAR(120) NULL,
-      type ENUM('comment', 'suggestion', 'opportunity')
-        NOT NULL DEFAULT 'comment',
+      type ENUM(
+        'comment',
+        'suggestion',
+        'opportunity'
+      ) NOT NULL DEFAULT 'comment',
       rating TINYINT UNSIGNED NOT NULL,
       message TEXT NOT NULL,
       ip_hash CHAR(64) NULL,
-      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      created_at TIMESTAMP NOT NULL
+        DEFAULT CURRENT_TIMESTAMP,
       INDEX idx_feedback_created_at (created_at),
       INDEX idx_feedback_rating (rating)
     ) ENGINE=InnoDB
@@ -124,7 +134,12 @@ async function initDatabase() {
 
   if (username && password) {
     const [rows] = await pool.query(
-      'SELECT id FROM admins WHERE username = ? LIMIT 1',
+      `
+      SELECT id
+      FROM admins
+      WHERE username = ?
+      LIMIT 1
+      `,
       [username]
     );
 
@@ -132,13 +147,21 @@ async function initDatabase() {
       const hash = await bcrypt.hash(password, 12);
 
       await pool.query(
-        'INSERT INTO admins (username, password_hash) VALUES (?, ?)',
+        `
+        INSERT INTO admins
+        (username, password_hash)
+        VALUES (?, ?)
+        `,
         [username, hash]
       );
 
-      console.log(`Admin account created: ${username}`);
+      console.log(
+        `Admin account created: ${username}`
+      );
     } else {
-      console.log(`Admin account already exists: ${username}`);
+      console.log(
+        `Admin account already exists: ${username}`
+      );
     }
   }
 }
@@ -204,8 +227,9 @@ app.post('/api/feedback', async (req, res) => {
 
     const rating = Number(req.body.rating);
 
-    const message = String(req.body.message || '')
-      .trim();
+    const message = String(
+      req.body.message || ''
+    ).trim();
 
     // التحقق من التقييم
     if (
@@ -238,7 +262,7 @@ app.post('/api/feedback', async (req, res) => {
       });
     }
 
-    // تشفير IP قبل تخزينه
+    // تشفير IP قبل التخزين
     const ip = req.ip || '';
 
     const ipHash = ip
@@ -269,7 +293,10 @@ app.post('/api/feedback', async (req, res) => {
       success: true
     });
   } catch (error) {
-    console.error('Feedback error:', error);
+    console.error(
+      'Feedback error:',
+      error
+    );
 
     res.status(500).json({
       success: false,
@@ -294,7 +321,10 @@ app.post('/api/admin/login', async (req, res) => {
 
     const [rows] = await pool.query(
       `
-      SELECT id, username, password_hash
+      SELECT
+        id,
+        username,
+        password_hash
       FROM admins
       WHERE username = ?
       LIMIT 1
@@ -324,14 +354,18 @@ app.post('/api/admin/login', async (req, res) => {
       }
 
       req.session.adminId = rows[0].id;
-      req.session.adminUsername = rows[0].username;
+      req.session.adminUsername =
+        rows[0].username;
 
       res.json({
         success: true
       });
     });
   } catch (error) {
-    console.error('Login error:', error);
+    console.error(
+      'Login error:',
+      error
+    );
 
     res.status(500).json({
       success: false,
@@ -356,12 +390,16 @@ app.post('/api/admin/logout', (req, res) => {
 // Current admin
 // =========================
 
-app.get('/api/admin/me', requireAdmin, (req, res) => {
-  res.json({
-    success: true,
-    username: req.session.adminUsername
-  });
-});
+app.get(
+  '/api/admin/me',
+  requireAdmin,
+  (req, res) => {
+    res.json({
+      success: true,
+      username: req.session.adminUsername
+    });
+  }
+);
 
 // =========================
 // Get feedback
@@ -390,7 +428,10 @@ app.get(
         rows
       });
     } catch (error) {
-      console.error('Get feedback error:', error);
+      console.error(
+        'Get feedback error:',
+        error
+      );
 
       res.status(500).json({
         success: false,
@@ -427,7 +468,10 @@ app.delete(
         success: true
       });
     } catch (error) {
-      console.error('Delete feedback error:', error);
+      console.error(
+        'Delete feedback error:',
+        error
+      );
 
       res.status(500).json({
         success: false,
@@ -452,14 +496,31 @@ app.use(
 // React production files
 // =========================
 
-app.use(
-  express.static(
-    path.join(__dirname, 'dist'),
-    {
-      index: 'index.html'
-    }
-  )
+// React is hosted on Netlify.
+// Railway only serves the React files if
+// dist/index.html actually exists.
+
+const distPath = path.join(
+  __dirname,
+  'dist'
 );
+
+const indexFile = path.join(
+  distPath,
+  'index.html'
+);
+
+if (fs.existsSync(indexFile)) {
+  app.use(
+    express.static(distPath, {
+      index: 'index.html'
+    })
+  );
+} else {
+  console.log(
+    'React dist folder not found. Frontend is hosted on Netlify.'
+  );
+}
 
 // =========================
 // React SPA fallback
@@ -473,11 +534,13 @@ app.get(/.*/, (req, res, next) => {
     return next();
   }
 
-  const indexFile = path.join(
-    __dirname,
-    'dist',
-    'index.html'
-  );
+  if (!fs.existsSync(indexFile)) {
+    return res.status(404).json({
+      success: false,
+      message:
+        'Frontend is hosted separately on Netlify.'
+    });
+  }
 
   res.sendFile(indexFile, (err) => {
     if (err) {
