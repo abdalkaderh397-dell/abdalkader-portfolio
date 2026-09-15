@@ -153,7 +153,7 @@ const T = ({ ar, en }) => (
 
 function App() {
   const [lang, setLang] = useState('ar');
-  const [light, setLight] = useState(false);
+ const [light, setLight] = useState(true);
   const [menu, setMenu] = useState(false);
   const [photo, setPhoto] = useState(photos[0]);
   const [journeyIndex, setJourneyIndex] = useState(0);
