@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import './style.css';
-
+const API_BASE = import.meta.env.VITE_API_URL || '';
 const photos = [
   '/images/profile-1.jpg',
   '/images/profile-2.jpg',
@@ -319,19 +319,19 @@ function App() {
       )
     );
 
-    try {
-      const res = await fetch('/api/feedback', {
-        method: 'POST',
+   try {
+  const res = await fetch(`${API_BASE}/api/feedback`, {
+    method: 'POST',
 
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json'
-        },
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json'
+    },
 
-        body: JSON.stringify(payload)
-      });
+    body: JSON.stringify(payload)
+  });
 
-      const data = await res.json();
+  const data = await res.json();
 
       if (!res.ok || !data.success) {
         throw new Error(
@@ -403,6 +403,7 @@ function App() {
           </button>
 
           <button
+            className="language-toggle"
             onClick={() =>
               setLang(v => (v === 'ar' ? 'en' : 'ar'))
             }
